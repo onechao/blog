@@ -6,10 +6,20 @@
     <description>Recent content in Posts on The Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 Sep 2018 23:48:04 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 02 Oct 2018 00:50:27 +0800</lastBuildDate>
     
 	<atom:link href="https://onechao.github.io/blog/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Docker Note</title>
+      <link>https://onechao.github.io/blog/posts/docker-note/</link>
+      <pubDate>Tue, 02 Oct 2018 00:50:27 +0800</pubDate>
+      
+      <guid>https://onechao.github.io/blog/posts/docker-note/</guid>
+      <description>安装docker Ubuntu 14.04 16.04 (使用apt-get进行安装)
+# step 1: 安装必要的一些系统工具 sudo apt-get update sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common # step 2: 安装GPG证书 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add - # Step 3: 写入软件源信息 sudo add-apt-repository &amp;quot;deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable&amp;quot; # Step 4: 更新并安装 Docker-CE sudo apt-get -y update sudo apt-get -y install docker-ce # 安装指定版本的Docker-CE: # Step 1: 查找Docker-CE的版本: # apt-cache madison docker-ce # docker-ce | 17.</description>
+    </item>
     
     <item>
       <title>My First Post</title>
