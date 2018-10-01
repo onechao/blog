@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>The Blog</title>
-    <link>https://onechao.github.io/blog/</link>
-    <description>Recent content on The Blog</description>
+    <title>Posts on The Blog</title>
+    <link>https://onechao.github.io/blog/post/</link>
+    <description>Recent content in Posts on The Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 02 Oct 2018 00:50:27 +0800</lastBuildDate>
     
-	<atom:link href="https://onechao.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://onechao.github.io/blog/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,24 +19,6 @@
       <guid>https://onechao.github.io/blog/post/docker-note/</guid>
       <description>安装docker Ubuntu 14.04 16.04 (使用apt-get进行安装)
 # step 1: 安装必要的一些系统工具 sudo apt-get update sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common # step 2: 安装GPG证书 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add - # Step 3: 写入软件源信息 sudo add-apt-repository &amp;quot;deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable&amp;quot; # Step 4: 更新并安装 Docker-CE sudo apt-get -y update sudo apt-get -y install docker-ce # 安装指定版本的Docker-CE: # Step 1: 查找Docker-CE的版本: # apt-cache madison docker-ce # docker-ce | 17.</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>https://onechao.github.io/blog/about/</link>
-      <pubDate>Tue, 02 Oct 2018 00:25:20 +0800</pubDate>
-      
-      <guid>https://onechao.github.io/blog/about/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>My First Post</title>
-      <link>https://onechao.github.io/blog/posts/my-first-post/</link>
-      <pubDate>Tue, 18 Sep 2018 23:48:04 +0800</pubDate>
-      
-      <guid>https://onechao.github.io/blog/posts/my-first-post/</guid>
-      <description></description>
     </item>
     
   </channel>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>The Blog</title>
+  <title>Posts &middot; The Blog</title>
 
   
   <link type="text/css" rel="stylesheet" href="https://onechao.github.io/blog/css/print.css" media="print">
@@ -23,7 +23,7 @@
   <link rel="shortcut icon" href="/favicon.png">
 
   
-  <link href="https://onechao.github.io/blog/index.xml" rel="alternate" type="application/rss+xml" title="The Blog" />
+  <link href="https://onechao.github.io/blog/post/index.xml" rel="alternate" type="application/rss+xml" title="The Blog" />
 
   
 </head>
@@ -50,35 +50,11 @@
 </aside>
 
     <main class="content container">
-    <div class="posts">
-<article class="post">
-  <h1 class="post-title">
-    <a href="https://onechao.github.io/blog/post/docker-note/">Docker Note</a>
-  </h1>
-  <time datetime="2018-10-02T00:50:27&#43;0800" class="post-date">Tue, Oct 2, 2018</time>
-  安装docker Ubuntu 14.04 16.04 (使用apt-get进行安装)
-# step 1: 安装必要的一些系统工具 sudo apt-get update sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common # step 2: 安装GPG证书 curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add - # Step 3: 写入软件源信息 sudo add-apt-repository &quot;deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable&quot; # Step 4: 更新并安装 Docker-CE sudo apt-get -y update sudo apt-get -y install docker-ce # 安装指定版本的Docker-CE: # Step 1: 查找Docker-CE的版本: # apt-cache madison docker-ce # docker-ce | 17.
-  
-  <div class="read-more-link">
-    <a href="/blog/post/docker-note/">Read More…</a>
-  </div>
-  
-</article><article class="post">
-  <h1 class="post-title">
-    <a href="https://onechao.github.io/blog/about/">About</a>
-  </h1>
-  <time datetime="2018-10-02T00:25:20&#43;0800" class="post-date">Tue, Oct 2, 2018</time>
-  
-  
-</article><article class="post">
-  <h1 class="post-title">
-    <a href="https://onechao.github.io/blog/posts/my-first-post/">My First Post</a>
-  </h1>
-  <time datetime="2018-09-18T23:48:04&#43;0800" class="post-date">Tue, Sep 18, 2018</time>
-  
-  
-</article>
-</div>
+    <ul class="posts">
+<li>
+    <span><a href="https://onechao.github.io/blog/post/docker-note/">Docker Note</a> <time class="pull-right post-list" datetime="2018-10-02T00:50:27&#43;0800">Tue, Oct 2, 2018</time></span>
+  </li>
+</ul>
     </main>
 
     

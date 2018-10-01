@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head>
+  <link href="//gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="generator" content="Hugo 0.47.1" />
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Docker Note &middot; The Blog</title>
+
+  
+  <link type="text/css" rel="stylesheet" href="https://onechao.github.io/blog/css/print.css" media="print">
+  <link type="text/css" rel="stylesheet" href="https://onechao.github.io/blog/css/poole.css">
+  <link type="text/css" rel="stylesheet" href="https://onechao.github.io/blog/css/syntax.css">
+  <link type="text/css" rel="stylesheet" href="https://onechao.github.io/blog/css/hyde.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700">
+
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  <link href="" rel="alternate" type="application/rss+xml" title="The Blog" />
+
+  
+</head>
+
+  <body class="theme-base-08 ">
+  <aside class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <a href="https://onechao.github.io/blog/"><h1>The Blog</h1></a>
+      <p class="lead">
+      An elegant open source and mobile first theme for <a href="http://hugo.spf13.com">hugo</a> made by <a href="http://twitter.com/mdo">@mdo</a>. Originally made for Jekyll.
+      </p>
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li><a href="https://onechao.github.io/blog/">Home</a> </li>
+        
+      </ul>
+    </nav>
+
+    <p>&copy; 2018. All rights reserved. </p>
+  </div>
+</aside>
+
+    <main class="content container">
+    <div class="post">
+  <h1>Docker Note</h1>
+  <time datetime=2018-10-02T00:50:27&#43;0800 class="post-date">Tue, Oct 2, 2018</time>
+  
+
+<h5 id="安装docker">安装docker</h5>
+
+<p>Ubuntu 14.04 16.04 (使用apt-get进行安装)</p>
+
+<pre><code class="language-shell"># step 1: 安装必要的一些系统工具
+sudo apt-get update
+sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common
+# step 2: 安装GPG证书
+curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
+# Step 3: 写入软件源信息
+sudo add-apt-repository &quot;deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable&quot;
+# Step 4: 更新并安装 Docker-CE
+sudo apt-get -y update
+sudo apt-get -y install docker-ce
+
+# 安装指定版本的Docker-CE:
+# Step 1: 查找Docker-CE的版本:
+# apt-cache madison docker-ce
+#   docker-ce | 17.03.1~ce-0~ubuntu-xenial | http://mirrors.aliyun.com/docker-ce/linux/ubuntu xenial/stable amd64 Packages
+#   docker-ce | 17.03.0~ce-0~ubuntu-xenial | http://mirrors.aliyun.com/docker-ce/linux/ubuntu xenial/stable amd64 Packages
+# Step 2: 安装指定版本的Docker-CE: (VERSION 例如上面的 17.03.1~ce-0~ubuntu-xenial)
+# sudo apt-get -y install docker-ce=[VERSION]
+</code></pre>
+
+<p>CentOS 7 (使用yum进行安装)</p>
+
+<pre><code class="language-shell"># step 1: 安装必要的一些系统工具
+sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+# Step 2: 添加软件源信息
+sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+# Step 3: 更新并安装 Docker-CE
+sudo yum makecache fast
+sudo yum -y install docker-ce
+# Step 4: 开启Docker服务
+sudo service docker start
+
+# 注意：
+# 官方软件源默认启用了最新的软件，您可以通过编辑软件源的方式获取各个版本的软件包。例如官方并没有将测试版本的软件源置为可用，你可以通过以下方式开启。同理可以开启各种测试版本等。
+# vim /etc/yum.repos.d/docker-ce.repo
+#   将 [docker-ce-test] 下方的 enabled=0 修改为 enabled=1
+#
+# 安装指定版本的Docker-CE:
+# Step 1: 查找Docker-CE的版本:
+# yum list docker-ce.x86_64 --showduplicates | sort -r
+#   Loading mirror speeds from cached hostfile
+#   Loaded plugins: branch, fastestmirror, langpacks
+#   docker-ce.x86_64            17.03.1.ce-1.el7.centos            docker-ce-stable
+#   docker-ce.x86_64            17.03.1.ce-1.el7.centos            @docker-ce-stable
+#   docker-ce.x86_64            17.03.0.ce-1.el7.centos            docker-ce-stable
+#   Available Packages
+# Step2 : 安装指定版本的Docker-CE: (VERSION 例如上面的 17.03.0.ce.1-1.el7.centos)
+# sudo yum -y install docker-ce-[VERSION]
+</code></pre>
+
+<p>添加docker-cn registry-mirrors, 修改/etc/docker/daemon.json</p>
+
+<pre><code>{
+  &quot;registry-mirrors&quot;: [&quot;https://registry.docker-cn.com&quot;]
+}
+</code></pre>
+
+<h5 id="普通用户添加到docker组">普通用户添加到docker组</h5>
+
+<ul>
+<li><code>sudo cat /etc/group | grep docker</code></li>
+<li>如果不存在docker组，可以添加<code>sudo groupadd docker</code></li>
+<li>添加当前用户到docker组，<code>sudo gpasswd -a ${USER} docker</code></li>
+<li>重启docker服务,<code>sudo systemctl restart docker</code></li>
+<li>如果权限不够，<code>sudo chmod a+rw /var/run/docker.sock</code></li>
+</ul>
+
+<p>#####Image获取</p>
+
+<ul>
+<li>Build from Dockerfile</li>
+</ul>
+
+<pre><code class="language-bash">$ more Dockerfile
+FROM ubuntu:14.04
+LABEL maintainer=&quot;WANG CHAO &lt;imonechao@alauda.io&gt;&quot;
+RUN apt-get update &amp;&amp; apt-get install -y redis-server
+EXPOSE 6379
+ENTRYPOINT [&quot;usr/bin/redis-server&quot;]
+$ docker build -t imonechao/redis:latest .
+</code></pre>
+
+<ul>
+<li>Pull from Registry</li>
+</ul>
+
+<pre><code class="language-bash">$ docker pull ubuntu:14.04
+</code></pre>
+
+<h5 id="构建image">构建Image</h5>
+
+<ul>
+<li>目录</li>
+</ul>
+
+<pre><code class="language-bash">.
+├── Dockerfile
+├── hello
+└── hello.c
+</code></pre>
+
+<ul>
+<li>Dockerfile</li>
+</ul>
+
+<pre><code class="language-dockerfile">FROM scratch
+ADD hello /
+CMD [&quot;/hello&quot;]
+</code></pre>
+
+<ul>
+<li>构建命令</li>
+</ul>
+
+<pre><code class="language-bash">$ docker build imonechao/hello-world:v1 .
+$ docker run imonechao/hello-world:v1
+</code></pre>
+
+<h5 id="什么是container">什么是Container</h5>
+
+<ul>
+<li>通过Image创建 （copy）</li>
+<li>在Image layer之上上建立一个container layer (可读写)</li>
+<li>类比面向对象：类和实例，Image类比成类，Container根据Image实例化的对象</li>
+<li>Image负责app的存储和分发， Container负责运行app</li>
+</ul>
+
+<p>Commands</p>
+
+<pre><code class="language-bash">$ docker container ls				#查看当前本地在运行的容器
+$ docker ps							#简写
+$ docker container ls -a			#列举所有容器	
+$ docker ps -a						#简写
+$ docker run -it ubuntu /bin/bash	#交互式运行, 退出容器停止
+$ docker container rm 4c074d4cf12a	#移除容器
+$ docker rm 4c						#简写
+
+$ docker image ls 					#列举当前所有image
+$ docker images						#简写
+
+$ docker image rm 3b853789146f 		#删除镜像
+$ docker rmi 3b853789146f			#简写
+
+$ docker container ls -aq 				#列举出所有containerID
+$ docker rm $(docker container ls -aq) 	#remove所有container
+$ docker rm $(docker container ls -f &quot;status=exited&quot;) #删除已退出的container
+</code></pre>
+
+<pre><code class="language-bash">$ docker container commit	#简写 docker commit
+$ docker image build		#简写 docker build
+</code></pre>
+
+<h5 id="创建image">创建Image</h5>
+
+<ul>
+<li>通过docker container commit创建image</li>
+</ul>
+
+<pre><code class="language-bash">$ docker commit clever_murdock imonechao/ubuntu-test
+sha256:7e77b169e46233f3dc273a7cae4554e746f6a12b15a7255619043cab03104ca8
+</code></pre>
+
+<pre><code class="language-bash">[vagrant@localhost hello-world]$ docker image ls
+REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE
+imonechao/ubuntu-test   latest              7e77b169e462        9 seconds ago       79.6MB
+imonechao/hello-world   latest              8ee6edbed39e        About an hour ago   844kB
+&lt;none&gt;                  &lt;none&gt;              0f521c802198        About an hour ago   844kB
+ubuntu                  14.04               8cef1fa16c77        28 hours ago        223MB
+ubuntu                  latest              452a96d81c30        28 hours ago        79.6MB
+hello-world             latest              e38bc07ac18e        2 weeks ago         1.85kB
+
+[vagrant@localhost hello-world]$ docker history 7e77b169e462
+IMAGE               CREATED              CREATED BY                                      SIZE                COMMENT
+7e77b169e462        About a minute ago   /bin/bash                                       46B
+452a96d81c30        28 hours ago         /bin/sh -c #(nop)  CMD [&quot;/bin/bash&quot;]            0B
+&lt;missing&gt;           28 hours ago         /bin/sh -c mkdir -p /run/systemd &amp;&amp; echo 'do…   7B
+&lt;missing&gt;           28 hours ago         /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$…   2.76kB
+&lt;missing&gt;           28 hours ago         /bin/sh -c rm -rf /var/lib/apt/lists/*          0B
+&lt;missing&gt;           28 hours ago         /bin/sh -c set -xe   &amp;&amp; echo '#!/bin/sh' &gt; /…   745B
+&lt;missing&gt;           28 hours ago         /bin/sh -c #(nop) ADD file:81813d6023adb66b8…   79.6MB
+[vagrant@localhost hello-world]$ docker history 452a96d81c30
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+452a96d81c30        28 hours ago        /bin/sh -c #(nop)  CMD [&quot;/bin/bash&quot;]            0B
+&lt;missing&gt;           28 hours ago        /bin/sh -c mkdir -p /run/systemd &amp;&amp; echo 'do…   7B
+&lt;missing&gt;           28 hours ago        /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$…   2.76kB
+&lt;missing&gt;           28 hours ago        /bin/sh -c rm -rf /var/lib/apt/lists/*          0B
+&lt;missing&gt;           28 hours ago        /bin/sh -c set -xe   &amp;&amp; echo '#!/bin/sh' &gt; /…   745B
+&lt;missing&gt;           28 hours ago        /bin/sh -c #(nop) ADD file:81813d6023adb66b8…   79.6MB
+</code></pre>
+
+<ul>
+<li>通过Dockerfile创建image</li>
+</ul>
+
+<p>Dockerfile</p>
+
+<pre><code class="language-dockerfile">FROM centos
+RUN yum install -y vim
+</code></pre>
+
+<pre><code class="language-bash">$ docker build -t imonechao/centos-vim-new .
+</code></pre>
+
+<pre><code class="language-bash">[vagrant@localhost docker-centos-vim]$ docker image ls
+REPOSITORY                 TAG                 IMAGE ID            CREATED             SIZE
+imonechao/centos-vim-new   latest              06564f5f0403        23 seconds ago      357MB
+centos                     latest              e934aafc2206        3 weeks ago         199MB
+</code></pre>
+
+<h5 id="dockerfile-语法">Dockerfile 语法</h5>
+
+<ul>
+<li>FROM</li>
+</ul>
+
+<pre><code class="language-dockerfile">  FROM scratch #制作base image
+  FROM centos #使用base image
+  FROM ubuntu:14:04
+</code></pre>
+
+<ul>
+<li>LABEL</li>
+</ul>
+
+<pre><code class="language-dockerfile">  LABEL mintainer=&quot;imonechao@alauda.io&quot;
+  LABEL version=&quot;1.0&quot;
+  LABEL description=&quot;desc&quot;
+</code></pre>
+
+<ul>
+<li>RUN</li>
+</ul>
+
+<p>避免创建多层，合并成一行</p>
+
+<pre><code class="language-dockerfile">  RUN yum update &amp;&amp; yum install -y vim python-dev
+  RUN apt-get update &amp;&amp; apt-get install -y perl\
+  pygen --no-install-recommends &amp;&amp; rm -rf \
+  /var/lib/apt/lists/* #清理cache
+</code></pre>
+
+<ul>
+<li>WORKDIR</li>
+</ul>
+
+<p>设定工作目录，使用WORKDIR改变工作目录，不要用RUN cd</p>
+
+<pre><code class="language-dockerfile">  WORKDIR /root 
+</code></pre>
+
+<pre><code class="language-dockerfile">  WORKDIR /test	#如果没有则自动创建
+  WORKDIR demo
+  RUN pwd			#输出结果应该是/test/demo
+</code></pre>
+
+<ul>
+<li>ADD and COPY</li>
+</ul>
+
+<pre><code class="language-dockerfile">  ADD hello /
+</code></pre>
+
+<pre><code class="language-dockerfile">  ADD test.tar.gz / #添加到根目录并解压
+</code></pre>
+
+<pre><code class="language-dockerfile">  WORKDIR /root
+  ADD hello test/ # /root/test/hello
+</code></pre>
+
+<ul>
+<li>ENV</li>
+</ul>
+
+<p>使用环境变量定义常量，增加可维护性</p>
+
+<pre><code class="language-dockerfile">  ENV MYSQL_VERSION 5.6 #设置常量
+  RUN apt-get install -y mysql-server=&quot;${MYSQL_VERSION}&quot; &amp;&amp; rm -rg /var/lib/apt/lists/* #引用常量
+</code></pre>
+
+<ul>
+<li>VOLUME and EXPOSE</li>
+</ul>
+
+<p>存储和网络</p>
+
+<ul>
+<li>CMD and ENTRYPOINT</li>
+</ul>
+
+<h5 id="run-vs-cmd-vs-entrypoint">RUN vs CMD vs ENTRYPOINT</h5>
+
+<p><code>RUN</code>：执行命令并创建新的Image Layer</p>
+
+<p><code>CMD</code>：设置容器启动后默认执行的命令和参数</p>
+
+<p><code>ENTRYPOINT</code>：设置容器启动时运行的命令</p>
+
+<h5 id="shell和exec格式">Shell和Exec格式</h5>
+
+<ul>
+<li>Shell格式</li>
+</ul>
+
+<pre><code class="language-dockerfile">  RUN apt-get install -y vim
+  CMD echo &quot;hello docker&quot;
+  ENTRYPOINT echo &quot;hello docker&quot;
+</code></pre>
+
+<ul>
+<li>Exec格式</li>
+</ul>
+
+<pre><code class="language-dockerfile">  RUN [&quot;apt-get&quot;, &quot;install&quot;, &quot;y&quot;, &quot;vim&quot;]
+  CMD [&quot;/bin/echo&quot;, &quot;hello docker&quot;]
+  ENTRYPOINT [&quot;/bin/echo&quot;, &quot;hello docker&quot;]
+</code></pre>
+
+<h5 id="cmd">CMD</h5>
+
+<ul>
+<li>容器启动时默认执行的命令</li>
+<li>如果docker run制定了其他命令，CMD命令会被忽略</li>
+<li>如果定义了多个CMD，只有最后一个会执行</li>
+</ul>
+
+<h5 id="entrypoint">ENTRYPOINT</h5>
+
+<ul>
+<li><p>让容器以应用程序或者服务形式运行</p></li>
+
+<li><p>不会被忽略，一定会执行</p></li>
+</ul>
+
+<pre><code class="language-dockerfile">  COPY docker-entrypoint.sh /usr/local/bin/
+  ENTRYPOINT [&quot;docker-entrypoint.sh&quot;]
+
+  EXPOSE 27017
+  CMD [&quot;mongod&quot;]
+</code></pre>
+
+<h5 id="image的分发">Image的分发</h5>
+
+<pre><code class="language-bash">$ docker push imonechao/centos-vim-new:latest
+</code></pre>
+
+<h5 id="将app打包成container">将app打包成Container</h5>
+
+<pre><code class="language-bash">.
+├── app.py
+└── Dockerfile
+</code></pre>
+
+<p>app.py</p>
+
+<pre><code class="language-python">from flask import Flask
+app = Flask(__name__)
+@app.route('/')
+def hello():
+	return &quot;hello docker&quot;
+if __name__ == '__main__':
+	app.run()
+
+</code></pre>
+
+<p>Dockerfile</p>
+
+<pre><code class="language-dockerfile">FROM python:2.7
+LABEL maintainer=&quot;Wang Chao&lt;chaowang1@alauda.io&gt;&quot;
+RUN pip install flask
+COPY app.py /app/
+WORKDIR /app
+EXPOSE 5000
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+</code></pre>
+
+<p>Commands</p>
+
+<pre><code class="language-bash">$ docker build -t imonechao/flask-hello-world .
+
+Sending build context to Docker daemon  3.072kB
+Step 1/7 : FROM python:2.7
+ ---&gt; ce24966d2075
+Step 2/7 : LABEL maintainer=&quot;Wang Chao&lt;chaowang1@alauda.io&gt;&quot;
+ ---&gt; Using cache
+ ---&gt; 35642ab535f2
+Step 3/7 : RUN pip install flask
+ ---&gt; Using cache
+ ---&gt; dea6b1daa43b
+Step 4/7 : COPY app.py /app/
+ ---&gt; 95ddb268703e
+Step 5/7 : WORKDIR /app
+Removing intermediate container f5c6e641cd75
+ ---&gt; a95e36e8f87e
+Step 6/7 : EXPOSE 5000
+ ---&gt; Running in f9b2020fbd44
+Removing intermediate container f9b2020fbd44
+ ---&gt; 805aa422ef95
+Step 7/7 : CMD [&quot;python&quot;, &quot;app.py&quot;]
+ ---&gt; Running in d4340d3a4f74
+Removing intermediate container d4340d3a4f74
+ ---&gt; e5f1fb9591cb
+Successfully built e5f1fb9591cb
+Successfully tagged imonechao/flask-hello-world:latest
+</code></pre>
+
+<pre><code class="language-bash">$ docker image ls
+
+REPOSITORY                    TAG                 IMAGE ID            CREATED             SIZE
+imonechao/flask-hello-world   latest              e5f1fb9591cb        43 seconds ago      685MB
+&lt;none&gt;                        &lt;none&gt;              a109724d577e        4 minutes ago       685MB
+imonechao/centos-vim-new      latest              06564f5f0403        3 hours ago         357MB
+ubuntu                        latest              452a96d81c30        31 hours ago        79.6MB
+python                        2.7                 ce24966d2075        45 hours ago        679MB
+centos                        latest              e934aafc2206        3 weeks ago         199MB
+</code></pre>
+
+<pre><code class="language-bash">$ docker run imonechao/flask-hello-world
+#$ docker run -d imonechao/flask-hello-world
+#c6abbbd680c0aac62b014dcebcbd8baf0dd84f64b1a513898a49b589dd6ff9f1
+
+ * Serving Flask app &quot;app&quot; (lazy loading)
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+</code></pre>
+
+<pre><code class="language-bash">$ docker ps
+
+CONTAINER ID        IMAGE                         COMMAND             CREATED             STATUS              PORTS               NAMES
+c6abbbd680c0        imonechao/flask-hello-world   &quot;python app.py&quot;     4 seconds ago       Up 3 seconds        5000/tcp            distracted_goldstine
+</code></pre>
+
+<h5 id="docker-exec">docker exec</h5>
+
+<pre><code class="language-bash">$ docker exec -it f0e4f2f382cd /bin/bash
+</code></pre>
+
+<pre><code class="language-bash">$ docker exec -it f0e4f2f382cd python
+</code></pre>
+
+<pre><code class="language-bash">$ docker exec -it f0e4f2f382cd ip a
+</code></pre>
+
+<pre><code class="language-bash">$ docker rm $(docker ps -aq)
+</code></pre>
+
+<pre><code class="language-bash">$ docker run -d --name=demo imonechao/flask-hello-world
+</code></pre>
+
+<pre><code class="language-bash">$ docker inspect 791ccb02d48e #查看container详细信息
+
+[
+    {
+        &quot;Id&quot;: &quot;791ccb02d48e5890ecd06685219b99a3a140f0719e08769313960bea05d32ba5&quot;,
+        &quot;Created&quot;: &quot;2018-04-29T07:04:50.437593251Z&quot;,
+        &quot;Path&quot;: &quot;python&quot;,
+        &quot;Args&quot;: [
+            &quot;app.py&quot;
+        ],
+        &quot;State&quot;: {
+            &quot;Status&quot;: &quot;running&quot;,
+            &quot;Running&quot;: true,
+            &quot;Paused&quot;: false,
+            &quot;Restarting&quot;: false,
+            &quot;OOMKilled&quot;: false,
+            &quot;Dead&quot;: false,
+            &quot;Pid&quot;: 6259,
+            &quot;ExitCode&quot;: 0,
+            &quot;Error&quot;: &quot;&quot;,
+            &quot;StartedAt&quot;: &quot;2018-04-29T07:16:43.397830498Z&quot;,
+            &quot;FinishedAt&quot;: &quot;2018-04-29T07:05:14.927004917Z&quot;
+        },
+        &quot;Image&quot;: &quot;sha256:e5f1fb9591cbcf0f38835ec58f036bcd2beaf5762fe3411a52e3fb24dfa83480&quot;,
+        &quot;ResolvConfPath&quot;: &quot;/var/lib/docker/containers/791ccb02d48e5890ecd06685219b99a3a140f0719e08769313960bea05d32ba5/resolv.conf&quot;,
+        &quot;HostnamePath&quot;: &quot;/var/lib/docker/containers/791ccb02d48e5890ecd06685219b99a3a140f0719e08769313960bea05d32ba5/hostname&quot;,
+        &quot;HostsPath&quot;: &quot;/var/lib/docker/containers/791ccb02d48e5890ecd06685219b99a3a140f0719e08769313960bea05d32ba5/hosts&quot;,
+        &quot;LogPath&quot;: &quot;/var/lib/docker/containers/791ccb02d48e5890ecd06685219b99a3a140f0719e08769313960bea05d32ba5/791ccb02d48e5890ecd06685219b99a3a140f0719e08769313960bea05d32ba5-json.log&quot;,
+        &quot;Name&quot;: &quot;/demo&quot;,
+        &quot;RestartCount&quot;: 0,
+        &quot;Driver&quot;: &quot;overlay2&quot;,
+        &quot;Platform&quot;: &quot;linux&quot;,
+        &quot;MountLabel&quot;: &quot;&quot;,
+        &quot;ProcessLabel&quot;: &quot;&quot;,
+        &quot;AppArmorProfile&quot;: &quot;&quot;,
+        &quot;ExecIDs&quot;: null,
+        &quot;HostConfig&quot;: {
+            &quot;Binds&quot;: null,
+            &quot;ContainerIDFile&quot;: &quot;&quot;,
+            &quot;LogConfig&quot;: {
+                &quot;Type&quot;: &quot;json-file&quot;,
+                &quot;Config&quot;: {}
+            },
+            &quot;NetworkMode&quot;: &quot;default&quot;,
+            &quot;PortBindings&quot;: {},
+            &quot;RestartPolicy&quot;: {
+                &quot;Name&quot;: &quot;no&quot;,
+                &quot;MaximumRetryCount&quot;: 0
+            },
+            &quot;AutoRemove&quot;: false,
+            &quot;VolumeDriver&quot;: &quot;&quot;,
+            &quot;VolumesFrom&quot;: null,
+            &quot;CapAdd&quot;: null,
+            &quot;CapDrop&quot;: null,
+            &quot;Dns&quot;: [],
+            &quot;DnsOptions&quot;: [],
+            &quot;DnsSearch&quot;: [],
+            &quot;ExtraHosts&quot;: null,
+            &quot;GroupAdd&quot;: null,
+            &quot;IpcMode&quot;: &quot;shareable&quot;,
+            &quot;Cgroup&quot;: &quot;&quot;,
+            &quot;Links&quot;: null,
+            &quot;OomScoreAdj&quot;: 0,
+            &quot;PidMode&quot;: &quot;&quot;,
+            &quot;Privileged&quot;: false,
+            &quot;PublishAllPorts&quot;: false,
+            &quot;ReadonlyRootfs&quot;: false,
+            &quot;SecurityOpt&quot;: null,
+            &quot;UTSMode&quot;: &quot;&quot;,
+            &quot;UsernsMode&quot;: &quot;&quot;,
+            &quot;ShmSize&quot;: 67108864,
+            &quot;Runtime&quot;: &quot;runc&quot;,
+            &quot;ConsoleSize&quot;: [
+                0,
+                0
+            ],
+            &quot;Isolation&quot;: &quot;&quot;,
+            &quot;CpuShares&quot;: 0,
+            &quot;Memory&quot;: 0,
+            &quot;NanoCpus&quot;: 0,
+            &quot;CgroupParent&quot;: &quot;&quot;,
+            &quot;BlkioWeight&quot;: 0,
+            &quot;BlkioWeightDevice&quot;: [],
+            &quot;BlkioDeviceReadBps&quot;: null,
+            &quot;BlkioDeviceWriteBps&quot;: null,
+            &quot;BlkioDeviceReadIOps&quot;: null,
+            &quot;BlkioDeviceWriteIOps&quot;: null,
+            &quot;CpuPeriod&quot;: 0,
+            &quot;CpuQuota&quot;: 0,
+            &quot;CpuRealtimePeriod&quot;: 0,
+            &quot;CpuRealtimeRuntime&quot;: 0,
+            &quot;CpusetCpus&quot;: &quot;&quot;,
+            &quot;CpusetMems&quot;: &quot;&quot;,
+            &quot;Devices&quot;: [],
+            &quot;DeviceCgroupRules&quot;: null,
+            &quot;DiskQuota&quot;: 0,
+            &quot;KernelMemory&quot;: 0,
+            &quot;MemoryReservation&quot;: 0,
+            &quot;MemorySwap&quot;: 0,
+            &quot;MemorySwappiness&quot;: null,
+            &quot;OomKillDisable&quot;: false,
+            &quot;PidsLimit&quot;: 0,
+            &quot;Ulimits&quot;: null,
+            &quot;CpuCount&quot;: 0,
+            &quot;CpuPercent&quot;: 0,
+            &quot;IOMaximumIOps&quot;: 0,
+            &quot;IOMaximumBandwidth&quot;: 0
+        },
+        &quot;GraphDriver&quot;: {
+            &quot;Data&quot;: {
+                &quot;LowerDir&quot;: &quot;/var/lib/docker/overlay2/15693a8f950f38062a0de35b8e1148ea5cd0ab8bdfbdce5f20197a00e68c2d93-init/diff:/var/lib/docker/overlay2/7b7e66ab927d8ce7bfc3d778dc94f9d1eafbc8d60c855381dc929001f7bd8a2f/diff:/var/lib/docker/overlay2/ec6f38d3f2e9c08421e2cb354954244b3e1b5bcc06c488c9d3b784faed02f317/diff:/var/lib/docker/overlay2/3e1c714114e4489d70da1ffed009810806446f822febd98579435c9a7a38a45b/diff:/var/lib/docker/overlay2/8a78dbf6fd1316f9c9e2903d87d9ebf5a35b0bae2196a436396e2bab7a0ef772/diff:/var/lib/docker/overlay2/b5f523ffd0c952b14f9e7da947c99fbee53b3ee704ac1bc80d121088437e3eba/diff:/var/lib/docker/overlay2/eedf125ffcf5164e989a39cb9d5ae8f2dc726f12a44b11a2b7444987825ade8e/diff:/var/lib/docker/overlay2/b7c632a023bbddccfe66702362b1994849a45f47ee4d44543161663cf455e590/diff:/var/lib/docker/overlay2/c034b5bd075d93c9c74a3af66dcf9a54ac1bf27d5b5ba5383a5d0c0cd26484ee/diff:/var/lib/docker/overlay2/19bb4d4dc83e0ded640bc979c0fcf4931842e128281f3c32b175182156952c91/diff:/var/lib/docker/overlay2/f2a47cfa1e25d3e7522fa6e4e432aa872a5113fb6b1a5a6b0211f021e634260f/diff&quot;,
+                &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/15693a8f950f38062a0de35b8e1148ea5cd0ab8bdfbdce5f20197a00e68c2d93/merged&quot;,
+                &quot;UpperDir&quot;: &quot;/var/lib/docker/overlay2/15693a8f950f38062a0de35b8e1148ea5cd0ab8bdfbdce5f20197a00e68c2d93/diff&quot;,
+                &quot;WorkDir&quot;: &quot;/var/lib/docker/overlay2/15693a8f950f38062a0de35b8e1148ea5cd0ab8bdfbdce5f20197a00e68c2d93/work&quot;
+            },
+            &quot;Name&quot;: &quot;overlay2&quot;
+        },
+        &quot;Mounts&quot;: [],
+        &quot;Config&quot;: {
+            &quot;Hostname&quot;: &quot;791ccb02d48e&quot;,
+            &quot;Domainname&quot;: &quot;&quot;,
+            &quot;User&quot;: &quot;&quot;,
+            &quot;AttachStdin&quot;: false,
+            &quot;AttachStdout&quot;: false,
+            &quot;AttachStderr&quot;: false,
+            &quot;ExposedPorts&quot;: {
+                &quot;5000/tcp&quot;: {}
+            },
+            &quot;Tty&quot;: false,
+            &quot;OpenStdin&quot;: false,
+            &quot;StdinOnce&quot;: false,
+            &quot;Env&quot;: [
+                &quot;PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;,
+                &quot;LANG=C.UTF-8&quot;,
+                &quot;PYTHONIOENCODING=UTF-8&quot;,
+                &quot;GPG_KEY=C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF&quot;,
+                &quot;PYTHON_VERSION=2.7.14&quot;,
+                &quot;PYTHON_PIP_VERSION=10.0.1&quot;
+            ],
+            &quot;Cmd&quot;: [
+                &quot;python&quot;,
+                &quot;app.py&quot;
+            ],
+            &quot;ArgsEscaped&quot;: true,
+            &quot;Image&quot;: &quot;imonechao/flask-hello-world&quot;,
+            &quot;Volumes&quot;: null,
+            &quot;WorkingDir&quot;: &quot;/app&quot;,
+            &quot;Entrypoint&quot;: null,
+            &quot;OnBuild&quot;: null,
+            &quot;Labels&quot;: {
+                &quot;maintainer&quot;: &quot;Wang Chao&lt;chaowang1@alauda.io&gt;&quot;
+            }
+        },
+        &quot;NetworkSettings&quot;: {
+            &quot;Bridge&quot;: &quot;&quot;,
+            &quot;SandboxID&quot;: &quot;51156a19948f8ee140e2a5c8bb249e98b3cac896ecd9d5664d4cef4e0a66dbe1&quot;,
+            &quot;HairpinMode&quot;: false,
+            &quot;LinkLocalIPv6Address&quot;: &quot;&quot;,
+            &quot;LinkLocalIPv6PrefixLen&quot;: 0,
+            &quot;Ports&quot;: {
+                &quot;5000/tcp&quot;: null
+            },
+            &quot;SandboxKey&quot;: &quot;/var/run/docker/netns/51156a19948f&quot;,
+            &quot;SecondaryIPAddresses&quot;: null,
+            &quot;SecondaryIPv6Addresses&quot;: null,
+            &quot;EndpointID&quot;: &quot;5abaee9fe8c37fca8ae22f059744bf4a6d400350a22c0b506c6ae80a4ecb1037&quot;,
+            &quot;Gateway&quot;: &quot;172.17.0.1&quot;,
+            &quot;GlobalIPv6Address&quot;: &quot;&quot;,
+            &quot;GlobalIPv6PrefixLen&quot;: 0,
+            &quot;IPAddress&quot;: &quot;172.17.0.2&quot;,
+            &quot;IPPrefixLen&quot;: 16,
+            &quot;IPv6Gateway&quot;: &quot;&quot;,
+            &quot;MacAddress&quot;: &quot;02:42:ac:11:00:02&quot;,
+            &quot;Networks&quot;: {
+                &quot;bridge&quot;: {
+                    &quot;IPAMConfig&quot;: null,
+                    &quot;Links&quot;: null,
+                    &quot;Aliases&quot;: null,
+                    &quot;NetworkID&quot;: &quot;01b78e734ee74c191f987f5921d0f61eff87725878c433ebacbcd1ff538000db&quot;,
+                    &quot;EndpointID&quot;: &quot;5abaee9fe8c37fca8ae22f059744bf4a6d400350a22c0b506c6ae80a4ecb1037&quot;,
+                    &quot;Gateway&quot;: &quot;172.17.0.1&quot;,
+                    &quot;IPAddress&quot;: &quot;172.17.0.2&quot;,
+                    &quot;IPPrefixLen&quot;: 16,
+                    &quot;IPv6Gateway&quot;: &quot;&quot;,
+                    &quot;GlobalIPv6Address&quot;: &quot;&quot;,
+                    &quot;GlobalIPv6PrefixLen&quot;: 0,
+                    &quot;MacAddress&quot;: &quot;02:42:ac:11:00:02&quot;,
+                    &quot;DriverOpts&quot;: null
+                }
+            }
+        }
+    }
+]
+</code></pre>
+
+<pre><code class="language-bash">$ docker logs 791ccb02d48e
+
+ * Serving Flask app &quot;app&quot; (lazy loading)
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Serving Flask app &quot;app&quot; (lazy loading)
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+</code></pre>
+
+<h5 id="容器资源限制-stress">容器资源限制 Stress</h5>
+
+<p>限制container资源使用</p>
+
+<p>Dockerfile</p>
+
+<pre><code class="language-dockerfile">FROM ubuntu
+RUN apt-get update &amp;&amp; apt-get install -y stress
+ENTRYPOINT [&quot;/usr/bin/stress&quot;]
+CMD []
+</code></pre>
+
+<pre><code class="language-bash">$ docker run --memory=200M imonechao/docker-stress --vm 1 --verbose #限定容器所占用的内存
+</code></pre>
+
+<p>设置CPU优先级设置</p>
+
+<pre><code class="language-bash">$ docker run --cpu-shares=10 --name=test1 imonechao/docker-stress --cpu 1
+
+stress: info: [1] dispatching hogs: 1 cpu, 0 io, 0 vm, 0 hdd
+</code></pre>
+
+<pre><code class="language-bash">$ docker run --cpu-shares=5 --name=test2 imonechao/docker-stress --cpu 1
+
+stress: info: [1] dispatching hogs: 1 cpu, 0 io, 0 vm, 0 hdd
+</code></pre>
+
+<pre><code class="language-bash">top - 10:54:17 up 31 min,  3 users,  load average: 2.02, 1.26, 0.61
+Tasks: 100 total,   3 running,  97 sleeping,   0 stopped,   0 zombie
+%Cpu(s):100.0 us,  0.0 sy,  0.0 ni,  0.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem :   500076 total,   156432 free,   134228 used,   209416 buff/cache
+KiB Swap:  1572860 total,  1555828 free,    17032 used.   326088 avail Mem
+
+  PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
+ 3619 root      20   0    8228     96      0 R 66.8  0.0   4:20.29 stress
+ 3673 root      20   0    8228     96      0 R 33.2  0.0   1:09.32 stress
+ 2476 root      20   0  612460  39052   7484 S  0.3  7.8   0:02.69 dockerd
+ 2480 root      20   0  301732  13232   3012 S  0.3  2.6   0:01.60 docker-containe
+ 3625 vagrant   20   0   57400   2104   1500 R  0.3  0.4   0:00.24 top
+</code></pre>
+
+<h5 id="底层技术支持">底层技术支持</h5>
+
+<ul>
+<li>Namespaces: 做隔离pid, net, ipc, mnt, uts</li>
+<li>Control groups: 做资源限制</li>
+<li>Union file systems: Container和image的分层</li>
+</ul>
+
+<h5 id="docker-network-namespace">Docker Network namespace</h5>
+
+<p>4-3网络命令空间</p>
+
+<pre><code class="language-bash">$ docker run -d --name test1 busybox /bin/sh -c &quot;while true; do sleep 3600; done&quot;
+</code></pre>
+
+<pre><code class="language-bash">$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+48998be57424        busybox             &quot;/bin/sh -c 'while t…&quot;   11 seconds ago      Up 10 seconds                           test1
+</code></pre>
+
+<pre><code class="language-bash">$ sudo docker exec -it 48998be57424 /bin/sh
+$ sudo docker exec -it test1 ip a
+
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+5: eth0@if6: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue
+    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+</code></pre>
+
+<h5 id="bridge-network">Bridge Network</h5>
+
+<pre><code class="language-bash">$ docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+3ba570f521bb        bridge              bridge              local
+688b50991e9a        host                host                local
+47437d28f06e        none                null                local
+</code></pre>
+
+<pre><code class="language-bash">$ docker network inspect 3ba570f521bb
+
+[
+    {
+        &quot;Name&quot;: &quot;bridge&quot;,
+        &quot;Id&quot;: &quot;3ba570f521bb4edc80e3a874ed5985ca3d9ecd3b7a6a5ff39f671742d56cea3e&quot;,
+        &quot;Created&quot;: &quot;2018-04-29T13:43:12.422927544Z&quot;,
+        &quot;Scope&quot;: &quot;local&quot;,
+        &quot;Driver&quot;: &quot;bridge&quot;,
+        &quot;EnableIPv6&quot;: false,
+        &quot;IPAM&quot;: {
+            &quot;Driver&quot;: &quot;default&quot;,
+            &quot;Options&quot;: null,
+            &quot;Config&quot;: [
+                {
+                    &quot;Subnet&quot;: &quot;172.17.0.0/16&quot;,
+                    &quot;Gateway&quot;: &quot;172.17.0.1&quot;
+                }
+            ]
+        },
+        &quot;Internal&quot;: false,
+        &quot;Attachable&quot;: false,
+        &quot;Ingress&quot;: false,
+        &quot;ConfigFrom&quot;: {
+            &quot;Network&quot;: &quot;&quot;
+        },
+        &quot;ConfigOnly&quot;: false,
+        &quot;Containers&quot;: {
+            &quot;48998be57424ce5244e79127bc0bf73325b7b8a1d0463b958283023357a2822b&quot;: {
+                &quot;Name&quot;: &quot;test1&quot;,
+                &quot;EndpointID&quot;: &quot;eb88ec935a7c3c6d6780674f182285fb4db67ac9b01407ac311e48f6f5010af4&quot;,
+                &quot;MacAddress&quot;: &quot;02:42:ac:11:00:02&quot;,
+                &quot;IPv4Address&quot;: &quot;172.17.0.2/16&quot;,
+                &quot;IPv6Address&quot;: &quot;&quot;
+            }
+        },
+        &quot;Options&quot;: {
+            &quot;com.docker.network.bridge.default_bridge&quot;: &quot;true&quot;,
+            &quot;com.docker.network.bridge.enable_icc&quot;: &quot;true&quot;,
+            &quot;com.docker.network.bridge.enable_ip_masquerade&quot;: &quot;true&quot;,
+            &quot;com.docker.network.bridge.host_binding_ipv4&quot;: &quot;0.0.0.0&quot;,
+            &quot;com.docker.network.bridge.name&quot;: &quot;docker0&quot;,
+            &quot;com.docker.network.driver.mtu&quot;: &quot;1500&quot;
+        },
+        &quot;Labels&quot;: {}
+    }
+]
+</code></pre>
+
+<h5 id="容器端口映射">容器端口映射</h5>
+
+<p>将容器的端口映射到docker host端口</p>
+
+<pre><code class="language-bash">$ sudo docker run --name web -d -p 80:80 nginx
+</code></pre>
+
+<pre><code class="language-bash">$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                NAMES
+fd993538d0b2        nginx               &quot;nginx -g 'daemon of…&quot;   5 seconds ago       Up 5 seconds        0.0.0.0:80-&gt;80/tcp   web
+</code></pre>
+
+<h5 id="两个container相互访问">两个container相互访问</h5>
+
+<p>启动两个container</p>
+
+<p>Redis-server</p>
+
+<pre><code class="language-bash">$ sudo docker run -d --name redis redis
+</code></pre>
+
+<p>tree</p>
+
+<pre><code>.
+|-- Dockerfile
+`-- app.py
+</code></pre>
+
+<p>app.py</p>
+
+<pre><code class="language-python">from flask import Flask
+from redis import Redis
+import os
+import socket
+
+app = Flask(__name__)
+redis = Redis(host=os.environ.get('REDIS_HOST', '127.0.0.1'), port=6379)
+
+
+@app.route('/')
+def hello():
+    redis.incr('hits')
+    return 'Hello Container World! I have been seen %s times and my hostname is %s.\n' % (redis.get('hits'),socket.gethostname())
+
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=5000, debug=True)
+</code></pre>
+
+<p>Dockerfile</p>
+
+<pre><code class="language-dockerfile">FROM python:2.7
+LABEL maintainer=&quot;Wang Chao imonechao@alauda.io&quot;
+COPY . /app
+WORKDIR /app
+RUN pip install flask redis
+EXPOSE 5000
+CMD [&quot;python&quot;,&quot;app.py&quot;]
+</code></pre>
+
+<p>创建image</p>
+
+<pre><code class="language-bash">$ sudo docker build -t imonechao/flask-redis .
+</code></pre>
+
+<p>启动app container</p>
+
+<pre><code class="language-bash">$ docker run -d -p 5000:5000 --link redis --name flask-redis -e REDIS_HOST=redis imonechao/flask-redis
+# -e 表示设置环境变量
+# --link表示通过redis名字访问container
+</code></pre>
+
+<h5 id="多机器通信">多机器通信</h5>
+
+<p>etcd</p>
+
+<h5 id="container-layer">Container layer</h5>
+
+<h5 id="数据持久化-data-volume">数据持久化：Data Volume</h5>
+
+<p>针对于该容器本身会产生数据</p>
+
+<ul>
+<li>指定Dockerfile在容器里的持久化路径，<code>VOLUME [&quot;/var/lib/mysql&quot;]</code>，容器产生的文件通过VOLUME映射到运行该容器机器本地linux上</li>
+<li>重命名<code>docker run -v mysql:/var/lib/mysql</code></li>
+</ul>
+
+<p>mysql 5.7 Dockerfile</p>
+
+<pre><code class="language-dockerfile">FROM debian:stretch-slim
+
+# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
+RUN groupadd -r mysql &amp;&amp; useradd -r -g mysql mysql
+
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends gnupg dirmngr &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# add gosu for easy step-down from root
+ENV GOSU_VERSION 1.7
+RUN set -x \
+	&amp;&amp; apt-get update &amp;&amp; apt-get install -y --no-install-recommends ca-certificates wget &amp;&amp; rm -rf /var/lib/apt/lists/* \
+	&amp;&amp; wget -O /usr/local/bin/gosu &quot;https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)&quot; \
+	&amp;&amp; wget -O /usr/local/bin/gosu.asc &quot;https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc&quot; \
+	&amp;&amp; export GNUPGHOME=&quot;$(mktemp -d)&quot; \
+	&amp;&amp; gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&amp;&amp; gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+	&amp;&amp; rm -rf &quot;$GNUPGHOME&quot; /usr/local/bin/gosu.asc \
+	&amp;&amp; chmod +x /usr/local/bin/gosu \
+	&amp;&amp; gosu nobody true \
+	&amp;&amp; apt-get purge -y --auto-remove ca-certificates wget
+
+RUN mkdir /docker-entrypoint-initdb.d
+
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
+# for MYSQL_RANDOM_ROOT_PASSWORD
+		pwgen \
+# for mysql_ssl_rsa_setup
+		openssl \
+# FATAL ERROR: please install the following Perl modules before executing /usr/local/mysql/scripts/mysql_install_db:
+# File::Basename
+# File::Copy
+# Sys::Hostname
+# Data::Dumper
+		perl \
+	&amp;&amp; rm -rf /var/lib/apt/lists/*
+
+RUN set -ex; \
+# gpg: key 5072E1F5: public key &quot;MySQL Release Engineering &lt;mysql-build@oss.oracle.com&gt;&quot; imported
+	key='A4A9406876FCBD3C456770C88C718D3B5072E1F5'; \
+	export GNUPGHOME=&quot;$(mktemp -d)&quot;; \
+	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys &quot;$key&quot;; \
+	gpg --export &quot;$key&quot; &gt; /etc/apt/trusted.gpg.d/mysql.gpg; \
+	rm -rf &quot;$GNUPGHOME&quot;; \
+	apt-key list &gt; /dev/null
+
+ENV MYSQL_MAJOR 5.7
+ENV MYSQL_VERSION 5.7.22-1debian9
+
+RUN echo &quot;deb http://repo.mysql.com/apt/debian/ stretch mysql-${MYSQL_MAJOR}&quot; &gt; /etc/apt/sources.list.d/mysql.list
+
+# the &quot;/var/lib/mysql&quot; stuff here is because the mysql-server postinst doesn't have an explicit way to disable the mysql_install_db codepath besides having a database already &quot;configured&quot; (ie, stuff in /var/lib/mysql/mysql)
+# also, we set debconf keys to make APT a little quieter
+RUN { \
+		echo mysql-community-server mysql-community-server/data-dir select ''; \
+		echo mysql-community-server mysql-community-server/root-pass password ''; \
+		echo mysql-community-server mysql-community-server/re-root-pass password ''; \
+		echo mysql-community-server mysql-community-server/remove-test-db select false; \
+	} | debconf-set-selections \
+	&amp;&amp; apt-get update &amp;&amp; apt-get install -y mysql-server=&quot;${MYSQL_VERSION}&quot; &amp;&amp; rm -rf /var/lib/apt/lists/* \
+	&amp;&amp; rm -rf /var/lib/mysql &amp;&amp; mkdir -p /var/lib/mysql /var/run/mysqld \
+	&amp;&amp; chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
+# ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
+	&amp;&amp; chmod 777 /var/run/mysqld \
+# comment out a few problematic configuration values
+	&amp;&amp; find /etc/mysql/ -name '*.cnf' -print0 \
+		| xargs -0 grep -lZE '^(bind-address|log)' \
+		| xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&amp;/' \
+# don't reverse lookup hostnames, they are usually another container
+	&amp;&amp; echo '[mysqld]\nskip-host-cache\nskip-name-resolve' &gt; /etc/mysql/conf.d/docker.cnf
+
+VOLUME /var/lib/mysql
+
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
+ENTRYPOINT [&quot;docker-entrypoint.sh&quot;]
+
+EXPOSE 3306
+CMD [&quot;mysqld&quot;]
+</code></pre>
+
+<p>创建Mysql容器</p>
+
+<pre><code class="language-bash">$ sudo docker run -d --name mysql1 -e MYSQL_ALLOW_EMPTY_PASSWORD=true mysql
+</code></pre>
+
+<pre><code class="language-bash">$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+829c880c5ae0        mysql               &quot;docker-entrypoint.s…&quot;   9 seconds ago       Up 9 seconds        3306/tcp            mysql1
+</code></pre>
+
+<pre><code class="language-bash">$ docker volume ls
+DRIVER              VOLUME NAME
+local               d67dc94b5360c8435bc00df26ce0f62e35073f10ebf835e35d93c3666b074588
+</code></pre>
+
+<pre><code class="language-bash">$ sudo docker volume inspect d67dc94b5360c8435bc00df26ce0f62e35073f10ebf835e35d93c3666b074588
+[
+    {
+        &quot;CreatedAt&quot;: &quot;2018-05-01T03:29:54Z&quot;,
+        &quot;Driver&quot;: &quot;local&quot;,
+        &quot;Labels&quot;: null,
+        &quot;Mountpoint&quot;: &quot;/var/lib/docker/volumes/d67dc94b5360c8435bc00df26ce0f62e35073f10ebf835e35d93c3666b074588/_data&quot;,
+        &quot;Name&quot;: &quot;d67dc94b5360c8435bc00df26ce0f62e35073f10ebf835e35d93c3666b074588&quot;,
+        &quot;Options&quot;: null,
+        &quot;Scope&quot;: &quot;local&quot;
+    }
+]
+</code></pre>
+
+<pre><code class="language-bash">$ sudo docker volume rm 7c81671a20551d9fc183174c628a195598f24d725dc5c837db792b0a220903cc
+</code></pre>
+
+<p>给volume命名</p>
+
+<pre><code class="language-bash">$ sudo docker run -d -v mysql:/var/lib/mysql --name mysql2 -e MYSQL_ALLOW_EMPTY_PASSWORD=true mysql
+</code></pre>
+
+<pre><code class="language-bash">$ docker exec -it mysql1 /bin/bash
+</code></pre>
+
+<pre><code class="language-shell"># mysql -u root
+</code></pre>
+
+<pre><code>mysql&gt; show databases;
++--------------------+
+| Database           |
++--------------------+
+| docker             |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.01 sec)
+</code></pre>
+
+<h5 id="数据持久化-bind-mouting">数据持久化：Bind Mouting</h5>
+
+<ul>
+<li>运行时，指定本地目录和容器目录对应关系 <code>docker run -v /home/aaa:/root/aaa</code></li>
+</ul>
+
+<p>目录 <code>/home/vagrant/labs/docker-nginx</code></p>
+
+<p>文件</p>
+
+<pre><code>.
+|-- Dockerfile
+|-- index.html
+</code></pre>
+
+<p>Dockerfile</p>
+
+<pre><code class="language-dockerfile"># this same shows how we can extend/change an existing official image from Docker Hub
+
+FROM nginx:latest
+# highly recommend you always pin versions for anything beyond dev/learn
+
+WORKDIR /usr/share/nginx/html
+# change working directory to root of nginx webhost
+# using WORKDIR is prefered to using 'RUN cd /some/path'
+
+COPY index.html index.html
+
+# I don't have to specify EXPOSE or CMD because they're in my FROM
+</code></pre>
+
+<p>创建容器，并将本地目录与容器目录做映射</p>
+
+<pre><code class="language-bash">$ docker run -d -v $(pwd):/usr/share/nginx/html -p 80:80 --name web imonechao/my-nginx
+</code></pre>
+
+<h5 id="docker-compose">Docker Compose</h5>
+
+<ul>
+<li>命令行工具</li>
+<li>通过一个yml文件定义多个容器的docker应用</li>
+<li>通过一条命令就可以根据yml文件的定义去创建或管理这个多个容器</li>
+</ul>
+
+<h5 id="docker-compose-yml">docker-compose.yml</h5>
+
+<p>Yaml</p>
+
+<ul>
+<li>Services</li>
+<li>Networks</li>
+<li>Volumes</li>
+</ul>
+
+<h5 id="services">Services</h5>
+
+<ul>
+<li>一个service代表一个container， 这个container可以从dockerhub的image来创建，或者从本地的Dockerfile build出来的image来创建</li>
+<li>Service的启动类似docker run，我们可以给其指定network和volume，所以可以给service指定network和Volume的引用</li>
+</ul>
+
+<p>YAML</p>
+
+<pre><code class="language-yaml">services:
+	db:
+		image:postgres:9.4
+		volumes:
+			- &quot;db-data:/var/lib/postgresql/data&quot;
+		networks:
+			- bask-tier
+</code></pre>
+
+<p>类似于</p>
+
+<pre><code class="language-bash">$ docker run -d --network back-tier -v db-data:/var/lib/postgresql/data postgres:9.4
+</code></pre>
+
+<pre><code class="language-yaml">services:
+worker:
+	build: ./worker
+	links:
+		- db
+		- redis
+	networks:
+		- back-tier
+</code></pre>
+
+<h5 id="volumes">Volumes</h5>
+
+<pre><code class="language-yaml">volumes:
+	db-data:
+</code></pre>
+
+<p>类似于</p>
+
+<pre><code class="language-bash">$ docker vloume create db-data
+</code></pre>
+
+<h5 id="networks">Networks</h5>
+
+<pre><code class="language-yaml">networks:
+	front-tier:
+		driver: bridge
+	back-tier:
+		driver: bridge
+</code></pre>
+
+<p>类似于</p>
+
+<pre><code class="language-bash">$ docker network create -d bridge back-tier
+</code></pre>
+
+<p><strong>完整例子：docker-compose.yml</strong></p>
+
+<pre><code class="language-yaml">version: '3'
+
+services:
+
+  wordpress:
+    image: wordpress
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_PASSWORD: root
+    networks:
+      - my-bridge
+
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - my-bridge
+
+volumes:
+  mysql-data:
+
+networks:
+  my-bridge:
+    driver: bridge
+</code></pre>
+
+<h5 id="docker-compose-1">docker-compose</h5>
+
+<ul>
+<li>安装</li>
+</ul>
+
+<pre><code class="language-bash">  $ sudo curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+  $ sudo chmod +x /usr/local/bin/docker-compose
+  $ docker-compose --version
+  docker-compose version 1.21.0, build 1719ceb
+</code></pre>
+
+<pre><code class="language-yaml">version: &quot;3&quot;
+
+services:
+
+  redis:
+    image: redis
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:5000
+    environment:
+      REDIS_HOST: redis
+</code></pre>
+
+<pre><code>$ docker-compose up -d
+</code></pre>
+
+<pre><code>$ docker-compose up --scale web=3 -d
+</code></pre>
+
+<p>lb</p>
+
+<pre><code class="language-yaml">version: &quot;3&quot;
+
+services:
+
+  redis:
+    image: redis
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      REDIS_HOST: redis
+
+  lb:
+    image: dockercloud/haproxy
+    links:
+      - web
+    ports:
+      - 8080:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+
+</code></pre>
+
+<p>vote app</p>
+
+<pre><code class="language-yaml">version: &quot;3&quot;
+
+services:
+  voting-app:
+    build: ./voting-app/.
+    volumes:
+     - ./voting-app:/app
+    ports:
+      - &quot;5000:80&quot;
+    links:
+      - redis
+    networks:
+      - front-tier
+      - back-tier
+
+  result-app:
+    build: ./result-app/.
+    volumes:
+      - ./result-app:/app
+    ports:
+      - &quot;5001:80&quot;
+    links:
+      - db
+    networks:
+      - front-tier
+      - back-tier
+
+  worker:
+    build: ./worker
+    links:
+      - db
+      - redis
+    networks:
+      - back-tier
+
+  redis:
+    image: redis
+    ports: [&quot;6379&quot;]
+    networks:
+      - back-tier
+
+  db:
+    image: postgres:9.4
+    volumes:
+      - &quot;db-data:/var/lib/postgresql/data&quot;
+    networks:
+      - back-tier
+
+volumes:
+  db-data:
+
+networks:
+  front-tier:
+  back-tier:
+
+
+
+</code></pre>
+
+<pre><code class="language-dockerfile">#result
+FROM node:0.10
+
+RUN mkdir /app
+WORKDIR /app
+
+ADD package.json /app/package.json
+RUN npm install &amp;&amp; npm ls
+RUN mv /app/node_modules /node_modules
+
+ADD . /app
+
+ENV PORT 80
+EXPOSE 80
+
+CMD [&quot;node&quot;, &quot;server.js&quot;]
+</code></pre>
+
+<pre><code class="language-dockerfile">#vote
+# Using official python runtime base image
+FROM python:2.7
+
+# Set the application directory
+WORKDIR /app
+
+# Install our requirements.txt
+ADD requirements.txt /app/requirements.txt
+RUN pip install -r requirements.txt
+
+# Copy our code from the current folder to /app inside the container
+ADD . /app
+
+# Make port 5000 available for links and/or publish
+EXPOSE 80 
+
+# Define our command to be run when launching the container
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+
+</code></pre>
+
+<pre><code class="language-dockerfile">#worker
+FROM java:7
+
+RUN apt-get update -qq &amp;&amp; apt-get install -y maven &amp;&amp; apt-get clean
+
+WORKDIR /code
+
+ADD pom.xml /code/pom.xml
+RUN [&quot;mvn&quot;, &quot;dependency:resolve&quot;]
+RUN [&quot;mvn&quot;, &quot;verify&quot;]
+
+# Adding source, compile and package into a fat jar
+ADD src /code/src
+RUN [&quot;mvn&quot;, &quot;package&quot;]
+
+CMD [&quot;/usr/lib/jvm/java-7-openjdk-amd64/bin/java&quot;, &quot;-jar&quot;, &quot;target/worker-jar-with-dependencies.jar&quot;]
+
+</code></pre>
+
+<h5 id="docker-swarm">Docker swarm</h5>
+
+</div>
+
+
+    </main>
+
+    
+  </body>
+</html>
